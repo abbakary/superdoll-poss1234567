@@ -151,7 +151,11 @@ def api_vehicle_tracking_data(request):
             # If invoice has no linked vehicle but has a plate reference, try to merge into real vehicle bucket
             if not veh_id and plate_ref:
                 try:
-                    matched_vehicle = Vehicle.objects.filter(plate_number__iexact=plate_ref).first()
+                    # IMPORTANT: Scope vehicle lookup by branch to prevent cross-branch data leakage
+                    vehicle_query = Vehicle.objects.filter(plate_number__iexact=plate_ref)
+                    if user_branch:
+                        vehicle_query = vehicle_query.filter(customer__branch=user_branch)
+                    matched_vehicle = vehicle_query.first()
                     if matched_vehicle:
                         veh_id = matched_vehicle.id
                         plate_val = matched_vehicle.plate_number or plate_ref
