@@ -1260,6 +1260,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 showLoadingSpinner(false);
                 isInitialLoad = false;
             });
+
+        // Also reload category trends chart when filters change
+        loadCategoryTrendsChart();
     }
     
     function renderMetrics(summary) {
