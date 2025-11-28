@@ -634,6 +634,14 @@ def api_create_invoice_from_upload(request):
                     order.vehicle = vehicle
                     logger.info(f"Updated order {order.id} vehicle to {vehicle.id}")
                 _save_with_retry(order, update_fields=['customer', 'vehicle'] if vehicle else ['customer'])
+
+                # IMPORTANT: Update customer visit tracking when reusing an existing order
+                # This ensures visit count is incremented even when linking to an existing order on a new day
+                try:
+                    from .services import CustomerService
+                    CustomerService.update_customer_visit(customer_obj)
+                except Exception as e:
+                    logger.warning(f"Failed to update customer visit when reusing order: {e}")
             
             # Create new invoice for this upload
             posted_inv_number = (request.POST.get('invoice_number') or '').strip()
