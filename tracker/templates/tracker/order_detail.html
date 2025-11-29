@@ -1412,13 +1412,24 @@
   }
 
   function openSignatureModal(){
-    if (overrunModal) {
-      const instance = bootstrap.Modal.getInstance(overrunModalEl);
-      if (instance) instance.hide();
+    if (overrunModal && typeof bootstrap !== 'undefined') {
+      try {
+        const instance = bootstrap.Modal.getInstance(overrunModalEl);
+        if (instance) instance.hide();
+      } catch(e) {}
     }
-    if (completeModalEl) {
-      new bootstrap.Modal(completeModalEl).show();
+    if (completeModalEl && typeof bootstrap !== 'undefined') {
+      try {
+        new bootstrap.Modal(completeModalEl).show();
+      } catch(e) { console.warn(e); }
     }
+
+
+
+
+
+
+
   }
 
   function ensureAndSubmit(){
