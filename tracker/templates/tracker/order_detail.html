@@ -1463,7 +1463,7 @@
 
     // Check if delay reason is required and validate
     const delayReasonText = document.getElementById('delayReasonText');
-    if (exceeds9HoursCheck && delayReasonDropdownRef) {
+    if (exceeds9HoursCheck && delayReasonText) {
       const selectedReason = delayReasonDropdownRef.value;
       if (!selectedReason) {
         // Switch to details tab to show the delay reason field
