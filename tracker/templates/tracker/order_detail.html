@@ -1464,12 +1464,12 @@
     // Check if delay reason is required and validate
     const delayReasonDropdownRef = document.getElementById('delayReasonDropdown');
     if (exceeds9HoursCheck && delayReasonText) {
-      const selectedReason = delayReasonDropdownRef.value;
+      const reasonText = (delayReasonText.value || "").trim();
       if (!selectedReason) {
         // Switch to details tab to show the delay reason field
         const detailsTab = document.getElementById('detailsTab');
         if (detailsTab) detailsTab.click();
-        alert('Order has exceeded 9 working hours. Please select a delay reason before completing.');
+        alert("Order has exceeded 9 working hours. Please provide a delay reason before completing.");
         return false;
       }
     }
