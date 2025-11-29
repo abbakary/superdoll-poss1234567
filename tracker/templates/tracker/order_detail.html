@@ -1377,7 +1377,10 @@
   const completeForm = document.getElementById('completeForm');
   const hiddenOverrun = document.getElementById('completeOverrunHidden');
   const overrunModalEl = document.getElementById('completeOverrunModal');
-  const overrunModal = overrunModalEl ? new bootstrap.Modal(overrunModalEl) : null;
+  let overrunModal = null;
+  if (typeof bootstrap !== 'undefined') {
+    try { overrunModal = new bootstrap.Modal(overrunModalEl); } catch(e) { console.warn(e); }
+  }
   const overrunTextarea = document.getElementById('completeOverrunReason');
   const overrunError = document.getElementById('completeOverrunError');
   const completeModalEl = document.getElementById('completeModal');
