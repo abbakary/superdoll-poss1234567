@@ -1377,7 +1377,10 @@
   const completeForm = document.getElementById('completeForm');
   const hiddenOverrun = document.getElementById('completeOverrunHidden');
   const overrunModalEl = document.getElementById('completeOverrunModal');
-  const overrunModal = overrunModalEl ? new bootstrap.Modal(overrunModalEl) : null;
+  let overrunModal = null;
+  if (typeof bootstrap !== 'undefined') {
+    try { overrunModal = new bootstrap.Modal(overrunModalEl); } catch(e) { console.warn(e); }
+  }
   const overrunTextarea = document.getElementById('completeOverrunReason');
   const overrunError = document.getElementById('completeOverrunError');
   const completeModalEl = document.getElementById('completeModal');
@@ -1409,13 +1412,24 @@
   }
 
   function openSignatureModal(){
-    if (overrunModal) {
-      const instance = bootstrap.Modal.getInstance(overrunModalEl);
-      if (instance) instance.hide();
+    if (overrunModal && typeof bootstrap !== 'undefined') {
+      try {
+        const instance = bootstrap.Modal.getInstance(overrunModalEl);
+        if (instance) instance.hide();
+      } catch(e) {}
     }
-    if (completeModalEl) {
-      new bootstrap.Modal(completeModalEl).show();
+    if (completeModalEl && typeof bootstrap !== 'undefined') {
+      try {
+        new bootstrap.Modal(completeModalEl).show();
+      } catch(e) { console.warn(e); }
     }
+
+
+
+
+
+
+
   }
 
   function ensureAndSubmit(){
@@ -1437,7 +1451,7 @@
       if (modal) modal.hide();
     }
     // Show overrun modal
-    if (overrunModal) overrunModal.show();
+    if (overrunModal) { try { overrunModal.show(); } catch(e) { console.warn(e); } }
   }
 
   function openCompleteFlow(){
@@ -1455,21 +1469,29 @@
 
   function handleFooterButtonClick(e) {
     e.preventDefault();
+    // Populate signature data from canvas
+    const signaturePad = document.getElementById("signaturePad");
+    const sigDataInput = document.getElementById("signatureDataInput");
+    if (signaturePad && sigDataInput) {
+      const signatureDataUrl = signaturePad.toDataURL("image/png", 0.8);
+      sigDataInput.value = signatureDataUrl;
+    }
+
 
     // Re-initialize delay reason fields before validation
     if (typeof initializeDelayReasonFields === 'function') {
       initializeDelayReasonFields();
     }
 
+    const delayReasonText = document.getElementById("delayReasonText");
     // Check if delay reason is required and validate
-    const delayReasonDropdownRef = document.getElementById('delayReasonDropdown');
-    if (exceeds9HoursCheck && delayReasonDropdownRef) {
-      const selectedReason = delayReasonDropdownRef.value;
-      if (!selectedReason) {
+    if (exceeds9HoursCheck && delayReasonText) {
+      const reasonText = (delayReasonText.value || "").trim();
+      if (!reasonText) {
         // Switch to details tab to show the delay reason field
         const detailsTab = document.getElementById('detailsTab');
         if (detailsTab) detailsTab.click();
-        alert('Order has exceeded 9 working hours. Please select a delay reason before completing.');
+        alert("Order has exceeded 9 working hours. Please provide a delay reason before completing.");
         return false;
       }
     }
