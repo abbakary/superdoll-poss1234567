@@ -242,6 +242,19 @@
                   {% endwith %}
                 </select>
               </div>
+              <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label fw-medium">Salesperson</label>
+                <select name="salesperson" class="form-select">
+                  <option value="">All Salespeople</option>
+                  {% for sp in salespersons %}
+                  {% if request.GET.salesperson|default:"" == sp.id|stringformat:"s" %}
+                  <option value="{{ sp.id }}" selected>{{ sp.code }} - {{ sp.name }}</option>
+                  {% else %}
+                  <option value="{{ sp.id }}">{{ sp.code }} - {{ sp.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
               {% if user.is_superuser %}
               <div class="col-xl-2 col-lg-4 col-md-6">
                 <label class="form-label fw-medium">Branch (admin)</label>
@@ -334,6 +347,7 @@
               <th class="fw-semibold">Customer</th>
               <th class="fw-semibold">Type</th>
               <th class="fw-semibold">Status</th>
+              <th class="fw-semibold">Salesperson</th>
               <th class="fw-semibold">Created</th>
               <th class="fw-semibold">Time</th>
               <th class="fw-semibold text-end" style="width: 60px;">Actions</th>
@@ -390,6 +404,19 @@
                   <span class="badge bg-dark rounded-pill"><i class="fa fa-times me-1"></i>Cancelled</span>
                 {% else %}
                   <span class="badge bg-light text-dark rounded-pill">{{ o.status }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if o.invoices.all %}
+                  {% for inv in o.invoices.all %}
+                    {% if inv.salesperson %}
+                      <small class="text-dark d-block"><strong>{{ inv.salesperson.code }}</strong></small>
+                      <small class="text-muted">{{ inv.salesperson.name }}</small>
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                {% else %}
+                  <small class="text-muted">-</small>
                 {% endif %}
               </td>
               <td class="text-muted small">{{ o.created_at|localtime|date_medium }}</td>

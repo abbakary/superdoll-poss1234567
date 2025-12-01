@@ -27,6 +27,40 @@ class Branch(models.Model):
         return f"{self.name}{r}"
 
 
+class Salesperson(models.Model):
+    """Sales personnel for tracking sales transactions and audit purposes."""
+    code = models.CharField(max_length=32, unique=True, help_text="Unique salesperson code (e.g., 346, 401)")
+    name = models.CharField(max_length=255, help_text="Salesperson name (e.g., Maria Shayo, DCV POS)")
+    is_active = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False, help_text="Set as default salesperson for sales without assigned seller")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["code"]
+        indexes = [
+            models.Index(fields=["code"], name="idx_salesperson_code"),
+            models.Index(fields=["is_active"], name="idx_salesperson_active"),
+            models.Index(fields=["is_default"], name="idx_salesperson_default"),
+        ]
+        verbose_name = "Salesperson"
+        verbose_name_plural = "Salespeople"
+
+    def __str__(self) -> str:
+        return f"{self.code} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        """Ensure only one default salesperson."""
+        if self.is_default:
+            Salesperson.objects.filter(is_default=True).exclude(id=self.id).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_default(cls):
+        """Get the default salesperson."""
+        return cls.objects.filter(is_default=True).first() or cls.objects.filter(code='401').first() or cls.objects.first()
+
+
 class Customer(models.Model):
     TYPE_CHOICES = [
         ("government", "Government"),
@@ -573,6 +607,7 @@ class Invoice(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='invoices')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
+    salesperson = models.ForeignKey('Salesperson', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices', help_text="Salesperson associated with this invoice")
 
     # Invoice details
     invoice_date = models.DateField(default=timezone.now)
@@ -698,6 +733,9 @@ class InvoiceLineItem(models.Model):
         db_index=True,
         help_text="Order type determined from item code or category"
     )
+
+    # Salesperson for this line item (if order_type is sales)
+    salesperson = models.ForeignKey('Salesperson', on_delete=models.SET_NULL, null=True, blank=True, related_name='line_items', help_text="Salesperson who made this sale")
 
     # Tracking
     created_at = models.DateTimeField(auto_now_add=True)

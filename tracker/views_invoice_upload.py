@@ -19,11 +19,29 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db import transaction
 
-from .models import Order, Customer, Vehicle, Invoice, InvoiceLineItem, InvoicePayment, Branch
+from .models import Order, Customer, Vehicle, Invoice, InvoiceLineItem, InvoicePayment, Branch, Salesperson
 from .utils import get_user_branch
 from .services import OrderService, CustomerService, VehicleService
 
 logger = logging.getLogger(__name__)
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_get_salespersons(request):
+    """API endpoint to fetch all active salespersons."""
+    try:
+        salespersons = Salesperson.objects.filter(is_active=True).order_by('code').values('id', 'code', 'name', 'is_default')
+        return JsonResponse({
+            'success': True,
+            'salespersons': list(salespersons)
+        })
+    except Exception as e:
+        logger.error(f"Error fetching salespersons: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': 'Failed to fetch salespersons'
+        }, status=500)
 
 
 def retry_on_db_lock(max_retries=3, initial_delay=0.1):
@@ -765,6 +783,20 @@ def api_create_invoice_from_upload(request):
             inv.total_amount = total_amount or (subtotal + tax_amount)
             inv.created_by = request.user
 
+            # Handle salesperson assignment (for sales invoices)
+            salesperson_id = request.POST.get('salesperson_id')
+            if salesperson_id:
+                try:
+                    salesperson = Salesperson.objects.get(id=int(salesperson_id))
+                    inv.salesperson = salesperson
+                    logger.info(f"Assigned salesperson {salesperson.code} - {salesperson.name} to invoice")
+                except (Salesperson.DoesNotExist, ValueError):
+                    logger.warning(f"Invalid salesperson_id: {salesperson_id}, using default")
+                    inv.salesperson = Salesperson.get_default()
+            else:
+                # Use default salesperson if not provided
+                inv.salesperson = Salesperson.get_default()
+
             # Set invoice_number if not already set (for newly created invoices)
             if not getattr(inv, 'invoice_number', None) or not inv.invoice_number:
                 if posted_inv_number and not existing_invoice:
@@ -862,6 +894,12 @@ def api_create_invoice_from_upload(request):
                         if key in seen_keys:
                             continue
                         seen_keys.add(key)
+
+                        # Create line item with salesperson if it's a sales item
+                        line_item_salesperson = None
+                        if item_order_type == 'sales' and inv.salesperson:
+                            line_item_salesperson = inv.salesperson
+
                         to_create.append(InvoiceLineItem(
                             invoice=inv,
                             code=code,
@@ -873,6 +911,7 @@ def api_create_invoice_from_upload(request):
                             line_total=line_total,
                             tax_amount=Decimal('0'),
                             order_type=item_order_type,
+                            salesperson=line_item_salesperson,
                         ))
                     except Exception as e:
                         logger.warning(f"Failed to process line item {idx}: {e}")

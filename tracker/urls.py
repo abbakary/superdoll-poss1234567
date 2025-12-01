@@ -179,6 +179,7 @@ urlpatterns = [
     # Invoice upload (two-step process)
     path("api/invoices/extract-preview/", views_invoice_upload.api_extract_invoice_preview, name="api_extract_invoice_preview"),
     path("api/invoices/create-from-upload/", views_invoice_upload.api_create_invoice_from_upload, name="api_create_invoice_from_upload"),
+    path("api/salespersons/", views_invoice_upload.api_get_salespersons, name="api_get_salespersons"),
     path("invoices/<int:pk>/", views_invoice.invoice_detail, name="invoice_detail"),
     path("invoices/<int:pk>/print/", views_invoice.invoice_print, name="invoice_print"),
     path("invoices/<int:pk>/pdf/", views_invoice.invoice_pdf, name="invoice_pdf"),

@@ -2774,6 +2774,7 @@ def orders_list(request: HttpRequest):
     priority = request.GET.get("priority", "")
     date_range = request.GET.get("date_range", "")
     customer_id = request.GET.get("customer", "")
+    salesperson_id = request.GET.get("salesperson", "")
 
     # Exclude temporary customers (those with full_name starting with "Plate " and phone starting with "PLATE_")
     orders = scope_queryset(Order.objects.select_related("customer", "vehicle").order_by("-created_at"), request.user, request).exclude(
@@ -2792,6 +2793,13 @@ def orders_list(request: HttpRequest):
         orders = orders.filter(priority=priority)
     if customer_id:
         orders = orders.filter(customer_id=customer_id)
+    if salesperson_id:
+        # Filter orders by invoices that have line items with this salesperson
+        try:
+            from .models import Invoice
+            orders = orders.filter(invoices__line_items__salesperson_id=salesperson_id).distinct()
+        except Exception as e:
+            logger.warning(f"Error filtering by salesperson: {e}")
     # Period filters: daily/weekly/monthly/yearly (aliases: today/week/month/year)
     dr = (date_range or '').lower()
     if dr in ("daily", "today"):
@@ -2874,6 +2882,11 @@ def orders_list(request: HttpRequest):
         orders = paginator.get_page(page)
 
     branches = list(Branch.objects.filter(is_active=True).order_by('name').values_list('name', flat=True))
+
+    # Get active salespersons for the filter dropdown
+    from .models import Salesperson
+    salespersons = Salesperson.objects.filter(is_active=True).order_by('code')
+
     return render(request, "tracker/orders_list.html", {
         "orders": orders,
         "started_orders": started_orders,
@@ -2892,6 +2905,7 @@ def orders_list(request: HttpRequest):
         "started_completed": started_completed,
         "documents_uploaded": documents_uploaded,
         "branches": branches,
+        "salespersons": salespersons,
         "plate_search": (request.GET.get("plate_search") or ""),
         "started_status": request.GET.get("status", "all"),
         "started_sort": request.GET.get("sort_by", "-started_at"),

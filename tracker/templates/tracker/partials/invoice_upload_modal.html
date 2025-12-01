@@ -130,6 +130,20 @@
 
               <hr class="my-3">
 
+              <!-- Salesperson Selection (for sales items) -->
+              <div id="salespersonSection" class="mb-4" style="display:none;">
+                <h6 class="text-muted mb-3"><i class="fa fa-user-tie me-2"></i>Sales Information</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-medium">Salesperson *</label>
+                    <select id="salespersonSelect" class="form-select form-select-sm" required>
+                      <option value="">-- Select Salesperson --</option>
+                    </select>
+                    <small class="text-muted">Select the salesperson who made this sale</small>
+                  </div>
+                </div>
+              </div>
+
               <!-- Payment Information -->
               <div class="mb-0">
                 <h6 class="text-muted mb-2"><i class="fa fa-money-bill me-2"></i>Payment Summary</h6>
@@ -325,10 +339,47 @@
   const additionalOrderTypeSelect = document.getElementById('additionalOrderTypeSelect');
   const additionalOrderTypeReason = document.getElementById('additionalOrderTypeReason');
   const addOrderTypeModal = document.getElementById('addOrderTypeModal');
+  const salespersonSection = document.getElementById('salespersonSection');
+  const salespersonSelect = document.getElementById('salespersonSelect');
 
   let additionalOrderTypes = [];
+  let salespersonList = [];
 
   if (!uploadBtn) return;
+
+  async function loadSalespersons() {
+    try {
+      const response = await fetch('{% url "tracker:api_get_salespersons" %}', {
+        method: 'GET',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      });
+
+      if (!response.ok) {
+        console.error('Failed to load salespersons:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+      salespersonList = data.salespersons || [];
+
+      if (salespersonSelect) {
+        salespersonSelect.innerHTML = '<option value="">-- Select Salesperson --</option>';
+        salespersonList.forEach(sp => {
+          const option = document.createElement('option');
+          option.value = sp.id;
+          option.textContent = `${sp.code} - ${sp.name}`;
+          if (sp.is_default) {
+            option.selected = true;
+          }
+          salespersonSelect.appendChild(option);
+        });
+      }
+    } catch (err) {
+      console.error('Error loading salespersons:', err);
+    }
+  }
 
   function getCSRF() {
     const name = 'csrftoken=';
@@ -340,6 +391,8 @@
     const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
     return el ? el.value : '';
   }
+
+  loadSalespersons();
 
   function setProgress(p) {
     if (progressBar) progressBar.style.width = Math.max(0, Math.min(100, p)) + '%';
@@ -592,10 +645,18 @@
 
     if (!items || items.length === 0) {
       lineItemsSection.style.display = 'none';
+      salespersonSection.style.display = 'none';
       return;
     }
 
     lineItemsSection.style.display = 'block';
+
+    const hasSalesItems = items.some(item => item.order_type === 'sales');
+    if (hasSalesItems) {
+      salespersonSection.style.display = 'block';
+    } else {
+      salespersonSection.style.display = 'none';
+    }
 
     items.forEach((item, idx) => {
       const code = item.code || '';
@@ -738,6 +799,17 @@
         inp.value = el.value;
       }
     });
+
+    if (salespersonSelect && salespersonSelect.value) {
+      let salespersonInput = invoiceForm.querySelector(`[name="salesperson_id"]`);
+      if (!salespersonInput) {
+        salespersonInput = document.createElement('input');
+        salespersonInput.type = 'hidden';
+        salespersonInput.name = 'salesperson_id';
+        hiddenFieldsDiv.appendChild(salespersonInput);
+      }
+      salespersonInput.value = salespersonSelect.value;
+    }
   }
 
   function formatDateForForm(dateStr) {

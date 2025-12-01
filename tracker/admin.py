@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Vehicle, Order, InventoryItem, Branch, ServiceType, ServiceAddon, LabourCode, DelayReasonCategory, DelayReason
+from .models import Customer, Vehicle, Order, InventoryItem, Branch, ServiceType, ServiceAddon, LabourCode, DelayReasonCategory, DelayReason, Salesperson, Invoice, InvoiceLineItem
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
@@ -188,6 +188,33 @@ class BranchAdmin(admin.ModelAdmin):
         """
         if search_term:
             exact_qs = queryset.filter(name__iexact=search_term)
+            if exact_qs.exists():
+                return exact_qs, False
+        return super().get_search_results(request, queryset, search_term)
+
+
+@admin.register(Salesperson)
+class SalespersonAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "is_active", "is_default", "created_at")
+    search_fields = ("code", "name")
+    list_filter = ("is_active", "is_default", "created_at")
+    readonly_fields = ("created_at", "updated_at")
+
+    fieldsets = (
+        ('Salesperson Information', {
+            'fields': ('code', 'name', 'is_active', 'is_default'),
+            'classes': ('wide', 'extrapretty'),
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('wide', 'extrapretty'),
+        }),
+    )
+
+    def get_search_results(self, request, queryset, search_term):
+        """Prioritize exact (case-insensitive) code matches for admin autocomplete."""
+        if search_term:
+            exact_qs = queryset.filter(code__iexact=search_term)
             if exact_qs.exists():
                 return exact_qs, False
         return super().get_search_results(request, queryset, search_term)
