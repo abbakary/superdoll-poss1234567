@@ -607,6 +607,7 @@ class Invoice(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='invoices')
     vehicle = models.ForeignKey(Vehicle, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
+    salesperson = models.ForeignKey('Salesperson', on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices', help_text="Salesperson associated with this invoice")
 
     # Invoice details
     invoice_date = models.DateField(default=timezone.now)
