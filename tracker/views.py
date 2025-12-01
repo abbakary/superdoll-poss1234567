@@ -2774,6 +2774,7 @@ def orders_list(request: HttpRequest):
     priority = request.GET.get("priority", "")
     date_range = request.GET.get("date_range", "")
     customer_id = request.GET.get("customer", "")
+    salesperson_id = request.GET.get("salesperson", "")
 
     # Exclude temporary customers (those with full_name starting with "Plate " and phone starting with "PLATE_")
     orders = scope_queryset(Order.objects.select_related("customer", "vehicle").order_by("-created_at"), request.user, request).exclude(
