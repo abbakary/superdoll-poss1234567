@@ -19,11 +19,29 @@ from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db import transaction
 
-from .models import Order, Customer, Vehicle, Invoice, InvoiceLineItem, InvoicePayment, Branch
+from .models import Order, Customer, Vehicle, Invoice, InvoiceLineItem, InvoicePayment, Branch, Salesperson
 from .utils import get_user_branch
 from .services import OrderService, CustomerService, VehicleService
 
 logger = logging.getLogger(__name__)
+
+
+@login_required
+@require_http_methods(["GET"])
+def api_get_salespersons(request):
+    """API endpoint to fetch all active salespersons."""
+    try:
+        salespersons = Salesperson.objects.filter(is_active=True).order_by('code').values('id', 'code', 'name', 'is_default')
+        return JsonResponse({
+            'success': True,
+            'salespersons': list(salespersons)
+        })
+    except Exception as e:
+        logger.error(f"Error fetching salespersons: {e}")
+        return JsonResponse({
+            'success': False,
+            'message': 'Failed to fetch salespersons'
+        }, status=500)
 
 
 def retry_on_db_lock(max_retries=3, initial_delay=0.1):
