@@ -1330,6 +1330,7 @@
               </div>
             </div>
           </div>
+        </form>
       </div>
       <div class="modal-footer bg-light border-top signature-modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1408,6 +1409,24 @@
       if (typeof initializeDelayReasonFields === 'function') {
         initializeDelayReasonFields();
       }
+      // Ensure signature pad canvas is available
+      setTimeout(function() {
+        const sigCanvas = document.getElementById('signaturePad');
+        if (!sigCanvas) {
+          // Trigger signature pad creation
+          const tabContent = document.getElementById('signatureSection');
+          if (tabContent && tabContent.style.display !== 'none') {
+            // The signature tab is visible, canvas should exist
+            // Force re-creation by clearing the container
+            const docContainer = document.getElementById('docSignContainer');
+            if (docContainer && !docContainer.querySelector('canvas')) {
+              docContainer.innerHTML = '';
+              docContainer.style.position = 'relative';
+              docContainer.style.overflow = 'hidden';
+            }
+          }
+        }
+      }, 150);
     });
   }
 
@@ -4831,9 +4850,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const sigDataInput = document.getElementById('signatureDataInput');
         const signaturePad = document.getElementById('signaturePad');
 
-        if (signaturePad && sigDataInput) {
-          const signatureDataUrl = signaturePad.toDataURL('image/png', 0.8);
-          sigDataInput.value = signatureDataUrl;
+        if (sigDataInput) {
+          if (signaturePad) {
+            try {
+              const signatureDataUrl = signaturePad.toDataURL('image/png', 0.8);
+              sigDataInput.value = signatureDataUrl;
+              console.log('✓ Signature captured, length: ' + signatureDataUrl.length);
+            } catch(err) {
+              console.error('✗ Failed to capture signature:', err);
+            }
+          } else {
+            console.warn('⚠ Signature canvas not found');
+          }
         }
 
         if (completeForm) {

@@ -81,16 +81,24 @@
               </button>
             </div>
 
+            <!-- Completion -->
+            <div class="btn-group" role="group">
+              <button type="button" id="completeOrderBtn" class="btn btn-success">
+                <i class="fa fa-check-circle me-2"></i>Complete Order
+              </button>
+            </div>
+
     
-          <!-- Complete Order Modal - Delay Reason Form -->
+          <!-- Complete Order Modal - With Signature Capture -->
           <div class="modal fade" id="completeOrderModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
+            <div class="modal-dialog modal-lg">
               <div class="modal-content">
-                <form id="completeOrderForm" method="post">
+                <form id="completeOrderForm" method="post" action="{% url 'tracker:complete_order' pk=order.id %}">
                   {% csrf_token %}
                   <input type="hidden" name="action" value="complete_order">
+                  <input type="hidden" name="signature_data" id="signatureDataInput">
                   <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title"><i class="fa fa-check-circle me-2"></i>Complete Order</h5>
+                    <h5 class="modal-title"><i class="fa fa-pen me-2"></i>Complete Order & Capture Signature</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                   </div>
                   <div class="modal-body">
@@ -99,6 +107,22 @@
                       <i class="fa fa-exclamation-triangle me-2"></i>
                       <strong>Order Exceeds 9 Working Hours</strong>
                       <p class="mb-0 mt-2">This order has exceeded 9 working hours. You must select a delay reason before completing.</p>
+                    </div>
+
+                    <!-- Signature Canvas Section -->
+                    <div class="mb-4">
+                      <label class="form-label fw-bold text-dark">
+                        <i class="fa fa-pen me-2"></i>Customer Signature <span class="text-danger">*</span>
+                      </label>
+                      <div class="border rounded p-3 bg-light" style="border: 2px solid #dee2e6; cursor: crosshair; min-height: 200px; position: relative;">
+                        <canvas id="completionSignaturePad" style="display: block; width: 100%; height: 200px; border: 1px solid #ccc; border-radius: 4px; background: white; cursor: crosshair;"></canvas>
+                      </div>
+                      <div class="d-flex gap-2 mt-2">
+                        <button type="button" id="clearCompletionSignature" class="btn btn-sm btn-outline-secondary">
+                          <i class="fa fa-eraser me-1"></i>Clear Signature
+                        </button>
+                        <small class="text-muted ms-auto align-self-center">Use mouse or touch to draw</small>
+                      </div>
                     </div>
 
                     <!-- Delay Reason Form -->
@@ -1379,8 +1403,84 @@ document.addEventListener('DOMContentLoaded', function(){
   }
 });
 
+// Signature Pad Initialization
+function initializeSignaturePad() {
+  const canvas = document.getElementById('completionSignaturePad');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  // Set canvas size to match container
+  function resizeCanvas() {
+    const container = canvas.parentElement;
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width - 8; // Subtract padding
+    canvas.height = 200;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#000';
+  }
+  resizeCanvas();
+
+  function getCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches?.[0]?.clientX) - rect.left;
+    const y = (e.clientY || e.touches?.[0]?.clientY) - rect.top;
+    return { x, y };
+  }
+
+  function startDrawing(e) {
+    isDrawing = true;
+    const { x, y } = getCoordinates(e);
+    lastX = x;
+    lastY = y;
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+
+    const { x, y } = getCoordinates(e);
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    lastX = x;
+    lastY = y;
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+  }
+
+  // Mouse events
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseleave', stopDrawing);
+
+  // Touch events
+  canvas.addEventListener('touchstart', startDrawing, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stopDrawing, { passive: false });
+
+  // Clear button
+  const clearBtn = document.getElementById('clearCompletionSignature');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+  }
+}
+
 // Complete Order Logic with Delay Reason Form
 document.addEventListener('DOMContentLoaded', function(){
+  initializeSignaturePad();
   const completeBtn = document.getElementById('completeOrderBtn');
   if (!completeBtn) return;
 
@@ -1480,17 +1580,33 @@ document.addEventListener('DOMContentLoaded', function(){
 
   if (completeOrderForm) {
     completeOrderForm.addEventListener('submit', function(e) {
+      e.preventDefault();
       delayReasonError.style.display = 'none';
+
+      // Capture signature from canvas
+      const canvas = document.getElementById('completionSignaturePad');
+      const signatureDataInput = document.getElementById('signatureDataInput');
+
+      if (canvas) {
+        try {
+          const signatureDataUrl = canvas.toDataURL('image/png', 0.8);
+          signatureDataInput.value = signatureDataUrl;
+        } catch (err) {
+          console.warn('Could not capture signature:', err);
+        }
+      }
 
       if (exceeds9Hours) {
         const selectedReason = delayReasonDropdown.value;
         if (!selectedReason) {
-          e.preventDefault();
           delayReasonError.textContent = 'Order has exceeded 9 working hours. Please select a delay reason before completing.';
           delayReasonError.style.display = 'block';
           return false;
         }
       }
+
+      // Submit the form
+      completeOrderForm.submit();
     });
   }
 
@@ -1507,6 +1623,7 @@ document.addEventListener('DOMContentLoaded', function(){
   if (completeOrderModalEl) {
     completeOrderModalEl.addEventListener('shown.bs.modal', function() {
       initializeDelayReasonFields();
+      initializeSignaturePad();
     });
   }
 });

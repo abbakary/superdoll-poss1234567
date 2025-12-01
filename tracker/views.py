@@ -3544,7 +3544,7 @@ def complete_order(request: HttpRequest, pk: int):
     except Exception as e:
         logger.warning(f"Error saving delay reason for order {o.id}: {str(e)}")
 
-    if not sig and sig_data.startswith('data:image/') and ';base64,' in sig_data:
+    if not sig and sig_data and sig_data.startswith('data:image/') and ';base64,' in sig_data:
         try:
             header, b64 = sig_data.split(';base64,', 1)
             ext = (header.split('/')[-1] or 'png').split(';')[0]
@@ -3553,7 +3553,8 @@ def complete_order(request: HttpRequest, pk: int):
                 messages.error(request, 'Signature image is too large.')
                 return redirect('tracker:order_detail', pk=o.id)
             sig = ContentFile(signature_bytes, name=f"signature_{o.id}_{int(time.time())}.{ext}")
-        except Exception:
+        except Exception as e:
+            logger.warning(f"Failed to decode signature_data for order {o.id}: {str(e)}")
             sig = None
 
     # If a signature file was uploaded directly, validate size/type and capture bytes
@@ -3577,6 +3578,7 @@ def complete_order(request: HttpRequest, pk: int):
             pass
 
     if not sig:
+        logger.error(f"No signature provided for order {o.id}. sig_file: {sig}, sig_data length: {len(sig_data) if sig_data else 0}, sig_data starts with 'data:image/': {sig_data.startswith('data:image/') if sig_data else False}")
         messages.error(request, 'Please draw a signature to complete the order.')
         return redirect('tracker:order_detail', pk=o.id)
 
