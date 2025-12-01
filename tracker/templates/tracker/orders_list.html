@@ -242,6 +242,19 @@
                   {% endwith %}
                 </select>
               </div>
+              <div class="col-xl-2 col-lg-4 col-md-6">
+                <label class="form-label fw-medium">Salesperson</label>
+                <select name="salesperson" class="form-select">
+                  <option value="">All Salespeople</option>
+                  {% for sp in salespersons %}
+                  {% if request.GET.salesperson|default:"" == sp.id|stringformat:"s" %}
+                  <option value="{{ sp.id }}" selected>{{ sp.code }} - {{ sp.name }}</option>
+                  {% else %}
+                  <option value="{{ sp.id }}">{{ sp.code }} - {{ sp.name }}</option>
+                  {% endif %}
+                  {% endfor %}
+                </select>
+              </div>
               {% if user.is_superuser %}
               <div class="col-xl-2 col-lg-4 col-md-6">
                 <label class="form-label fw-medium">Branch (admin)</label>
