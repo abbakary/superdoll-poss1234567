@@ -1444,11 +1444,17 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const num = parseFloat(qty);
                                     return Number.isInteger(num) ? num.toString() : num.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
                                 };
+                                const itemBadgeClass = (() => {
+                                    const cat = (item.category || '').toLowerCase();
+                                    if (cat === 'sales') return 'badge-sales';
+                                    if (cat === 'labour') return 'badge-labour';
+                                    return 'badge-service';
+                                })();
                                 return `
                                 <tr>
                                     <td><code style="font-size: 0.8rem;">${item.code || '-'}</code></td>
                                     <td style="font-size: 0.85rem;">${item.description}</td>
-                                    <td><span class="badge-custom badge-service" style="font-size: 0.7rem;">${item.category}</span></td>
+                                    <td><span class="badge-custom ${itemBadgeClass}" style="font-size: 0.7rem;">${item.category}</span></td>
                                     <td style="text-align: center;">${formatQty(item.qty)}</td>
                                     <td style="text-align: right;">${formatCurrency(item.unit_price)}</td>
                                     <td style="text-align: right;"><strong>${formatCurrency(item.total)}</strong></td>
