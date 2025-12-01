@@ -894,6 +894,12 @@ def api_create_invoice_from_upload(request):
                         if key in seen_keys:
                             continue
                         seen_keys.add(key)
+
+                        # Create line item with salesperson if it's a sales item
+                        line_item_salesperson = None
+                        if item_order_type == 'sales' and inv.salesperson:
+                            line_item_salesperson = inv.salesperson
+
                         to_create.append(InvoiceLineItem(
                             invoice=inv,
                             code=code,
@@ -905,6 +911,7 @@ def api_create_invoice_from_upload(request):
                             line_total=line_total,
                             tax_amount=Decimal('0'),
                             order_type=item_order_type,
+                            salesperson=line_item_salesperson,
                         ))
                     except Exception as e:
                         logger.warning(f"Failed to process line item {idx}: {e}")
