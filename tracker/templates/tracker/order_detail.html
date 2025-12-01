@@ -664,6 +664,14 @@
                                 <td class="col-line-item-unit"><small class="text-muted">{{ item.unit|default:'-' }}</small></td>
                                 <td class="col-line-item-qty" style="text-align: center;"><small class="fw-semibold">{{ item.quantity|floatformat:0 }}</small></td>
                                 <td class="col-line-item-rate" style="text-align: right;"><small>{{ item.unit_price|floatformat:2 }}</small></td>
+                                <td class="col-line-item-salesperson">
+                                  {% if item.salesperson %}
+                                    <small class="text-dark d-block"><strong>{{ item.salesperson.code }}</strong></small>
+                                    <small class="text-muted">{{ item.salesperson.name }}</small>
+                                  {% else %}
+                                    <small class="text-muted">-</small>
+                                  {% endif %}
+                                </td>
                                 <td class="col-line-item-total" style="text-align: right;"><small><strong class="text-success">{{ item.line_total|floatformat:2 }}</strong></small></td>
                               </tr>
                               {% endfor %}
