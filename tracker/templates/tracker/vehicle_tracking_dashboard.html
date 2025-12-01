@@ -1299,9 +1299,15 @@ document.addEventListener('DOMContentLoaded', function() {
             row.className = 'vehicle-row-expandable';
 
             const serviceTypesBadges = vehicle.service_types && vehicle.service_types.length > 0
-                ? vehicle.service_types.map(type =>
-                    `<span class="badge-custom badge-service" style="font-size: 0.75rem;">${type}</span>`
-                ).join(' ')
+                ? vehicle.service_types.map(type => {
+                    let badgeClass = 'badge-service';
+                    if (type.toLowerCase() === 'sales') {
+                        badgeClass = 'badge-sales';
+                    } else if (type.toLowerCase() === 'labour') {
+                        badgeClass = 'badge-labour';
+                    }
+                    return `<span class="badge-custom ${badgeClass}" style="font-size: 0.75rem;">${type}</span>`;
+                }).join(' ')
                 : '<span style="color: #999;">-</span>';
 
             const returningBadge = vehicle.is_returning ? '<span class="badge-custom badge-returning"><i class="fa fa-redo me-1"></i>Returning</span>' : '';
