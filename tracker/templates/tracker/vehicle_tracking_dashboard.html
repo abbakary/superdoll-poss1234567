@@ -1415,7 +1415,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div>Order: <strong>${invoice.order_number || 'N/A'}</strong></div>
                         ${invoice.categories && invoice.categories.length > 0 ? `
                             <div style="margin-top: 6px;">
-                                Categories: ${invoice.categories.map(cat => `<span class="badge-custom badge-service" style="font-size: 0.7rem;">${cat}</span>`).join(' ')}
+                                Categories: ${invoice.categories.map(cat => {
+                                    let badgeClass = 'badge-service';
+                                    if (cat.toLowerCase() === 'sales') {
+                                        badgeClass = 'badge-sales';
+                                    } else if (cat.toLowerCase() === 'labour') {
+                                        badgeClass = 'badge-labour';
+                                    }
+                                    return `<span class="badge-custom ${badgeClass}" style="font-size: 0.7rem;">${cat}</span>`;
+                                }).join(' ')}
                             </div>
                         ` : ''}
                     </div>
