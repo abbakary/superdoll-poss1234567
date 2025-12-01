@@ -36,11 +36,17 @@
               <p class="mb-0"><strong>Started:</strong> <span class="text-muted">{{ order.started_at|date:"M d, Y H:i" }}</span></p>
             </div>
             <div class="col-md-6 text-md-end">
-              <p class="mb-2"><strong>Type:</strong> 
+              <p class="mb-2"><strong>Type:</strong>
                 {% if order.type == 'service' %}
                   <span class="badge bg-primary"><i class="fa fa-wrench me-1"></i>Service</span>
                 {% elif order.type == 'sales' %}
                   <span class="badge bg-success"><i class="fa fa-shopping-cart me-1"></i>Sales</span>
+                {% elif order.type == 'labour' %}
+                  <span class="badge bg-info"><i class="fa fa-tools me-1"></i>Labour</span>
+                {% elif order.type == 'mixed' %}
+                  <span class="badge bg-dark"><i class="fa fa-layer-group me-1"></i>Mixed</span>
+                {% elif order.type == 'unknown' %}
+                  <span class="badge bg-secondary"><i class="fa fa-question me-1"></i>Other</span>
                 {% else %}
                   <span class="badge bg-secondary">{{ order.type }}</span>
                 {% endif %}
