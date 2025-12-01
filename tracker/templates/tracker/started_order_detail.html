@@ -1504,17 +1504,33 @@ document.addEventListener('DOMContentLoaded', function(){
 
   if (completeOrderForm) {
     completeOrderForm.addEventListener('submit', function(e) {
+      e.preventDefault();
       delayReasonError.style.display = 'none';
+
+      // Capture signature from canvas
+      const canvas = document.getElementById('completionSignaturePad');
+      const signatureDataInput = document.getElementById('signatureDataInput');
+
+      if (canvas) {
+        try {
+          const signatureDataUrl = canvas.toDataURL('image/png', 0.8);
+          signatureDataInput.value = signatureDataUrl;
+        } catch (err) {
+          console.warn('Could not capture signature:', err);
+        }
+      }
 
       if (exceeds9Hours) {
         const selectedReason = delayReasonDropdown.value;
         if (!selectedReason) {
-          e.preventDefault();
           delayReasonError.textContent = 'Order has exceeded 9 working hours. Please select a delay reason before completing.';
           delayReasonError.style.display = 'block';
           return false;
         }
       }
+
+      // Submit the form
+      completeOrderForm.submit();
     });
   }
 
