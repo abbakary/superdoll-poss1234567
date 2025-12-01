@@ -597,6 +597,7 @@
                                     <div><strong>Sales:</strong> {{ revenue_by_type.sales|default:0|floatformat:0|intcomma }}</div>
                                     <div><strong>Service:</strong> {{ revenue_by_type.service|default:0|floatformat:0|intcomma }}</div>
                                     <div><strong>Labour:</strong> {{ revenue_by_type.labour|default:0|floatformat:0|intcomma }}</div>
+                                    {% if revenue_by_type.unknown and revenue_by_type.unknown > 0 %}<div><strong>Other:</strong> {{ revenue_by_type.unknown|floatformat:0|intcomma }}</div>{% endif %}
                                 </div>
                                 <div class="sub-kpi-trend trend-neutral">
                                     <i class="fa fa-chart-bar"></i>
@@ -658,6 +659,7 @@
                                     <div><strong>Sales:</strong> {{ revenue_by_type_today.sales|default:0|floatformat:0|intcomma }}</div>
                                     <div><strong>Service:</strong> {{ revenue_by_type_today.service|default:0|floatformat:0|intcomma }}</div>
                                     <div><strong>Labour:</strong> {{ revenue_by_type_today.labour|default:0|floatformat:0|intcomma }}</div>
+                                    {% if revenue_by_type_today.unknown and revenue_by_type_today.unknown > 0 %}<div><strong>Other:</strong> {{ revenue_by_type_today.unknown|floatformat:0|intcomma }}</div>{% endif %}
                                 </div>
                                 <div class="sub-kpi-trend trend-neutral">
                                     <i class="fa fa-chart-bar"></i>

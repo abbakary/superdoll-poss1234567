@@ -15,6 +15,9 @@ def get_revenue_by_order_type(invoices_qs=None, date_from=None, date_to=None):
     """
     Calculate total revenue breakdown by order type (sales, service, labour, unknown).
 
+    Unmapped/unknown item codes are tracked separately to allow better visibility
+    into which items don't have specified types.
+
     Args:
         invoices_qs: QuerySet of invoices to analyze (optional, defaults to all)
         date_from: Start date for filtering invoices (optional)
@@ -25,7 +28,7 @@ def get_revenue_by_order_type(invoices_qs=None, date_from=None, date_to=None):
         - sales: Total revenue from sales items
         - service: Total revenue from service items
         - labour: Total revenue from labour items
-        - unknown: Total revenue from items with unknown type
+        - unknown: Total revenue from items with unspecified/unmapped codes
         - total: Total revenue across all types
         - count: Number of invoices analyzed
     """
@@ -66,13 +69,15 @@ def get_revenue_by_order_type(invoices_qs=None, date_from=None, date_to=None):
     }
     
     # Sum line totals by order type
+    # Items with order_type='unknown' or None are treated as unspecified/unmapped codes
     for item in line_items:
         order_type = item.order_type or 'unknown'
         line_value = item.line_total + item.tax_amount if item.tax_amount else item.line_total
-        
+
         if order_type in result:
             result[order_type] = Decimal(str(result[order_type])) + Decimal(str(line_value))
         else:
+            # Any unrecognized type defaults to 'unknown'
             result['unknown'] = Decimal(str(result['unknown'])) + Decimal(str(line_value))
     
     # Calculate total
