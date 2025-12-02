@@ -2538,6 +2538,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  /* Delay Reason Card Styles */
+  .delay-reason-card {
+    border-left: 4px solid;
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .delay-reason-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .delay-reason-card.border-danger {
+    border-left-color: #dc3545;
+    background-color: rgba(220, 53, 69, 0.02);
+  }
+
+  .delay-reason-card.border-info {
+    border-left-color: #0dcaf0;
+    background-color: rgba(13, 202, 240, 0.02);
+  }
+
+  .delay-reason-icon {
+    min-width: 56px;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .delay-reason-card .card-title {
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+  }
+
+  .delay-reason-card .card-text {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.6;
+  }
+
   .time-metrics-group,
   .timeline-events-group {
     padding: 0.5rem 0;
