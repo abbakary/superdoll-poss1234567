@@ -45,8 +45,8 @@
                   <span class="badge bg-info"><i class="fa fa-tools me-1"></i>Labour</span>
                 {% elif order.type == 'mixed' %}
                   <span class="badge bg-dark"><i class="fa fa-layer-group me-1"></i>Mixed</span>
-                {% elif order.type == 'unknown' %}
-                  <span class="badge bg-secondary"><i class="fa fa-question me-1"></i>Other</span>
+                {% elif order.type == 'unspecified' %}
+                  <span class="badge bg-secondary"><i class="fa fa-question me-1"></i>Unspecified</span>
                 {% else %}
                   <span class="badge bg-secondary">{{ order.type }}</span>
                 {% endif %}
