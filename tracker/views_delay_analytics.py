@@ -212,19 +212,18 @@ def api_delay_reasons_breakdown(request):
     
     # Breakdown by category
     category_breakdown = orders_qs.values(
-        'delay_reason__category__category',
-        'delay_reason__category__get_category_display'
+        'delay_reason__category__category'
     ).annotate(
         count=Count('id')
     ).order_by('-count')
-    
+
     total = sum(item['count'] for item in category_breakdown)
-    
+
     data = []
     for item in category_breakdown:
         data.append({
             'category': item['delay_reason__category__category'],
-            'category_name': item['delay_reason__category__get_category_display'],
+            'category_name': _get_category_display(item['delay_reason__category__category']),
             'count': item['count'],
             'percentage': round(item['count'] / total * 100, 1) if total > 0 else 0,
         })
