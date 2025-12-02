@@ -360,27 +360,39 @@
               </div>
             </div>
 
-            <!-- Delay Reason Display - Shows red alert when 9+ hours exceeded with delay reason -->
+            <!-- Delay Reason Display - Shows red alert when 2+ hours exceeded with delay reason -->
             {% if order.overrun_reason and order.exceeded_9_hours %}
             <div class="col-12">
-              <div class="alert alert-danger bg-danger bg-opacity-10 border-danger">
-                <div class="d-flex align-items-start">
-                  <i class="fa fa-exclamation-circle text-danger me-3 mt-1"></i>
-                  <div>
-                    <strong><i class="fa fa-clock me-2"></i>Order Exceeded 9 Working Hours (Took Longer)</strong>
-                    <p class="mb-0 mt-2 text-dark">{{ order.overrun_reason }}</p>
+              <div class="card border-danger shadow-sm delay-reason-card">
+                <div class="card-body p-4">
+                  <div class="d-flex align-items-start">
+                    <div class="delay-reason-icon bg-danger bg-opacity-10 rounded-circle p-3 me-4">
+                      <i class="fa fa-exclamation-triangle text-danger fa-lg"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="card-title text-danger fw-bold mb-2 d-flex align-items-center">
+                        <i class="fa fa-clock me-2"></i>Order Exceeded Expected Time (Took Longer)
+                      </h6>
+                      <p class="card-text text-dark mb-0 ps-0 lh-base">{{ order.overrun_reason }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             {% elif order.overrun_reason %}
             <div class="col-12">
-              <div class="alert alert-info bg-info bg-opacity-10 border-info">
-                <div class="d-flex align-items-start">
-                  <i class="fa fa-comment-dots text-info me-3 mt-1"></i>
-                  <div>
-                    <strong>Delay Reason</strong>
-                    <p class="mb-0 mt-1 text-dark">{{ order.overrun_reason }}</p>
+              <div class="card border-info shadow-sm delay-reason-card">
+                <div class="card-body p-4">
+                  <div class="d-flex align-items-start">
+                    <div class="delay-reason-icon bg-info bg-opacity-10 rounded-circle p-3 me-4">
+                      <i class="fa fa-comment-dots text-info fa-lg"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                      <h6 class="card-title text-info fw-bold mb-2 d-flex align-items-center">
+                        <i class="fa fa-info-circle me-2"></i>Delay Reason Reported
+                      </h6>
+                      <p class="card-text text-dark mb-0 ps-0 lh-base">{{ order.overrun_reason }}</p>
+                    </div>
                   </div>
                 </div>
               </div>
