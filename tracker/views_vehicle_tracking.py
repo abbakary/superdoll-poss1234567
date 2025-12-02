@@ -38,7 +38,7 @@ def vehicle_tracking_dashboard(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     status_filter = request.GET.get('status', '')  # completed, pending, all
-    order_type_filter = request.GET.get('order_type', '')  # service, sales, labour
+    order_type_filter = request.GET.get('order_type', '')  # service, sales, inquiry, labour, unspecified, mixed
     
     # Set default date range
     if not end_date:
