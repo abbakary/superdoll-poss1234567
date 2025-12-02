@@ -1031,7 +1031,7 @@ def api_create_invoice_from_upload(request):
 
                     order.type = final_type
                     order.mixed_categories = json.dumps(final_categories) if final_type == 'mixed' and final_categories else None
-                    order.save(update_fields=['type', 'mixed_categories'])
+                    _save_with_retry(order, update_fields=['type', 'mixed_categories'])
                     logger.info(f"Updated order {order.id} aggregated type to {final_type}, categories: {final_categories}")
                 except Exception as e:
                     logger.warning(f"Failed to aggregate order type from linked invoices: {e}")
