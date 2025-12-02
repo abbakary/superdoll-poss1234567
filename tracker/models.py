@@ -200,7 +200,7 @@ class Order(models.Model):
     # Status lifecycle: created -> in_progress -> (overdue or completed or cancelled)
     # created = "Started": Order just created, not yet auto-progressed
     # in_progress: Order auto-progressed after 10 mins, actively being worked on
-    # overdue: Order exceeded 9 working hours (8 AM - 5 PM) while in_progress
+    # overdue: Order exceeded 2 hours while in_progress
     # completed: Order finished successfully
     # cancelled: Order cancelled by user
     PRIORITY_CHOICES = [("low", "Low"), ("medium", "Medium"), ("high", "High"), ("urgent", "Urgent")]
@@ -259,11 +259,11 @@ class Order(models.Model):
     overrun_reported_at = models.DateTimeField(blank=True, null=True)
     overrun_reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders_overrun_reported')
 
-    # Delay reason for orders that exceeded 9+ working hours
-    delay_reason = models.ForeignKey('DelayReason', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', help_text="Reason for delay if order exceeded 9 hours")
+    # Delay reason for orders that exceeded 2+ hours
+    delay_reason = models.ForeignKey('DelayReason', on_delete=models.SET_NULL, null=True, blank=True, related_name='orders', help_text="Reason for delay if order exceeded 2 hours")
     delay_reason_reported_at = models.DateTimeField(blank=True, null=True)
     delay_reason_reported_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders_delay_reason_reported')
-    exceeded_9_hours = models.BooleanField(default=False, help_text="Whether order exceeded 9 working hours")
+    exceeded_9_hours = models.BooleanField(default=False, help_text="Whether order exceeded 2 hours threshold")
 
     # Job card/identification number for quick order lookup (optional)
     job_card_number = models.CharField(max_length=64, blank=True, null=True, unique=True)
@@ -284,7 +284,7 @@ class Order(models.Model):
         return get_order_overdue_status(self)
 
     def is_overdue(self):
-        """Check if order is overdue (9+ working hours in progress)."""
+        """Check if order is overdue (2+ hours in progress)."""
         if self.status != 'in_progress' or not self.started_at:
             return False
         from .utils.time_utils import is_order_overdue
