@@ -5853,20 +5853,35 @@ document.addEventListener('DOMContentLoaded', function() {
           const successAlert = document.createElement('div');
           successAlert.className = 'alert alert-success alert-dismissible fade show';
           successAlert.innerHTML = `
-            <i class="fa fa-check-circle me-2"></i>Invoice linked successfully!
+            <i class="fa fa-check-circle me-2"></i>Invoice created successfully! Reloading page...
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
           `;
-          document.querySelector('.modal-body').insertBefore(successAlert, document.querySelector('.card'));
+          const modalBody = document.querySelector('#uploadAdditionalInvoiceModal .modal-body');
+          if (modalBody && modalBody.querySelector('.card')) {
+            modalBody.insertBefore(successAlert, modalBody.querySelector('.card'));
+          }
 
-          // Close modal after a delay and reload page to show updated invoice
+          // Close modal after a short delay and reload page to show updated invoice
           setTimeout(() => {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('uploadAdditionalInvoiceModal'));
-            modal?.hide();
+            try {
+              const modalElement = document.getElementById('uploadAdditionalInvoiceModal');
+              if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                  modal.hide();
+                }
+              }
+            } catch (e) {
+              console.warn('Could not close modal:', e);
+            }
 
             // Reload page to show the newly added invoice
-            location.reload();
+            // Force reload from server to ensure fresh data
+            setTimeout(() => {
+              window.location.href = window.location.href;
+            }, 500);
 
-          }, 2000);
+          }, 1500);
         } else {
           uploadError.textContent = data.message || 'Failed to create invoice';
           uploadError.style.display = 'block';
