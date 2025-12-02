@@ -1,6 +1,6 @@
 """
 Time utilities for calculating order duration and overdue status.
-Overdue threshold: 9 calendar hours (simple calculation).
+Overdue threshold: 2 calendar hours (simple calculation).
 """
 
 from datetime import datetime, timedelta
