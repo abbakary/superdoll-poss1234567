@@ -466,12 +466,14 @@
     function updateDelayTrendsChart(data) {
         const dates = data.map(d => d.date);
         const delayedCounts = data.map(d => d.delayed_count);
+        const exceededCounts = data.map(d => d.exceeded_2h);
         const delayRates = data.map(d => d.delay_rate);
 
         const options = {
             chart: { type: 'area', height: 300 },
             series: [
                 { name: 'Delayed Orders', data: delayedCounts },
+                { name: 'Exceeded 2 Hours', data: exceededCounts },
                 { name: 'Delay Rate %', data: delayRates }
             ],
             xaxis: { categories: dates },
