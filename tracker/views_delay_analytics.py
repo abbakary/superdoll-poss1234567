@@ -496,7 +496,7 @@ def api_delay_recommendations(request):
                 'impact': 'high'
             })
     
-    # Analysis 2: Orders exceeding 9 hours
+    # Analysis 2: Orders exceeding 2 hours
     exceeded_count = orders_qs.filter(exceeded_9_hours=True).count()
     if exceeded_count > 0:
         pct = exceeded_count / orders_qs.count() * 100
@@ -504,8 +504,8 @@ def api_delay_recommendations(request):
         recommendations.append({
             'priority': priority,
             'category': 'Urgent',
-            'title': f"{pct:.1f}% of Delays Exceed 9 Working Hours",
-            'description': f"{exceeded_count} orders exceeded 9 working hours. Implement preventive measures to reduce critical delays.",
+            'title': f"{pct:.1f}% of Delays Exceed 2 Hours",
+            'description': f"{exceeded_count} orders exceeded 2 hours. Implement preventive measures to reduce critical delays.",
             'impact': 'critical'
         })
     
