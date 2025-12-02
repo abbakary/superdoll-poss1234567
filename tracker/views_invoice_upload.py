@@ -1140,7 +1140,7 @@ def api_create_invoice_from_upload(request):
                         if not created and reason:
                             component.reason = reason
                             component.invoice = inv
-                            component.save(update_fields=['reason', 'invoice'])
+                            _save_with_retry(component, update_fields=['reason', 'invoice'])
                         elif created:
                             logger.info(f"Created OrderComponent for order {order.id}: type={component_type}")
                         else:
