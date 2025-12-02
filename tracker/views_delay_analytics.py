@@ -496,10 +496,10 @@ def api_delay_recommendations(request):
                 'impact': 'high'
             })
     
-    # Analysis 2: Orders exceeding 2 hours
+    # Analysis 2: Orders exceeding 2 hours threshold
     exceeded_count = orders_qs.filter(exceeded_9_hours=True).count()
-    if exceeded_count > 0:
-        pct = exceeded_count / orders_qs.count() * 100
+    if exceeded_count > 0 and orders_qs.count() > 0:
+        pct = (exceeded_count / orders_qs.count()) * 100
         priority = 'high' if pct > 20 else 'medium'
         recommendations.append({
             'priority': priority,
