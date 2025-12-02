@@ -40,7 +40,7 @@ class AutoProgressOrdersMiddleware(MiddlewareMixin):
             # Do not block the request pipeline on errors
             pass
 
-        # Mark orders as overdue based on working hours (9 working hours = 8 AM to 5 PM)
+        # Mark orders as overdue based on 2 hour threshold
         # Only check orders that are in_progress and have started_at set
         try:
             from .utils.time_utils import is_order_overdue
