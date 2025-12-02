@@ -171,7 +171,7 @@ class LabourCode(models.Model):
     """
     code = models.CharField(max_length=32, unique=True, db_index=True)
     description = models.CharField(max_length=255)
-    category = models.CharField(max_length=64, help_text="Order type category: 'labour' or 'service' (tyre/wheel services map to 'service')")
+    category = models.CharField(max_length=64, help_text="Order type category: 'labour', 'service', 'tyre service', 'sales', or 'unspecified'")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
