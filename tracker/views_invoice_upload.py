@@ -1113,6 +1113,14 @@ def api_create_invoice_from_upload(request):
                         logger.info(f"Created OrderInvoiceLink for invoice {inv.id} to order {order.id} (is_primary={is_primary_invoice})")
                     else:
                         logger.info(f"OrderInvoiceLink already exists for invoice {inv.id} and order {order.id}")
+
+                    # For additional invoices (not primary), clear the direct order FK to avoid duplication
+                    # Only primary invoice should have inv.order = order set
+                    # Additional invoices should only exist in OrderInvoiceLink
+                    if not is_primary_invoice and inv.order_id:
+                        inv.order = None
+                        _save_with_retry(inv, update_fields=['order'])
+                        logger.info(f"Cleared order FK for additional invoice {inv.id} (order {order.id})")
                 except Exception as e:
                     logger.warning(f"Failed to create OrderInvoiceLink for invoice {inv.id}: {e}")
 
