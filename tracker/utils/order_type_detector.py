@@ -20,18 +20,19 @@ def determine_order_type_from_codes(item_codes: List[str]) -> Tuple[str, List[st
     - If item code found in LabourCode table -> map to its category (service or labour)
     - If item code NOT found -> treat as 'sales' (unmapped products/items)
     - If mixed categories detected -> 'mixed' type with all categories
+    - If no codes provided or cannot determine -> 'unspecified'
 
     Args:
         item_codes: List of item codes extracted from invoice
 
     Returns:
         Tuple of:
-        - order_type: 'labour', 'service', 'sales', or 'mixed'
+        - order_type: 'labour', 'service', 'sales', 'unspecified', or 'mixed'
         - categories: List of unique categories found (includes "sales" for unmapped)
         - mapping_info: Dict with code->category mappings and unmapped codes
     """
     if not item_codes:
-        return 'sales', [], {'mapped': {}, 'unmapped': [], 'categories_found': [], 'order_types_found': []}
+        return 'unspecified', [], {'mapped': {}, 'unmapped': [], 'categories_found': [], 'order_types_found': []}
 
     from tracker.models import LabourCode
 
