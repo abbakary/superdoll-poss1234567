@@ -161,14 +161,24 @@ def api_delay_analytics_summary(request):
     avg_hours = total_duration / delayed_orders_with_times.count() if delayed_orders_with_times.exists() else 0
     
     # Most common delay reasons
-    top_reasons = orders_qs.values(
+    top_reasons_raw = orders_qs.values(
         'delay_reason__reason_text',
-        'delay_reason__category__get_category_display'
+        'delay_reason__category__category'
     ).annotate(
         count=Count('id'),
         percentage=Cast(Count('id') * 100.0 / total_delayed, FloatField())
     ).order_by('-count')[:10]
-    
+
+    top_reasons = []
+    for item in top_reasons_raw:
+        top_reasons.append({
+            'delay_reason__reason_text': item['delay_reason__reason_text'],
+            'delay_reason__category__category': item['delay_reason__category__category'],
+            'delay_reason__category__get_category_display': _get_category_display(item['delay_reason__category__category']),
+            'count': item['count'],
+            'percentage': item['percentage'],
+        })
+
     return JsonResponse({
         'success': True,
         'summary': {
@@ -178,7 +188,7 @@ def api_delay_analytics_summary(request):
             'exceeded_9_hours': exceeded_9_hours_count,
             'average_hours': round(avg_hours, 1),
         },
-        'top_reasons': list(top_reasons)
+        'top_reasons': top_reasons
     })
 
 
