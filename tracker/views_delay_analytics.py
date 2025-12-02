@@ -367,7 +367,7 @@ def api_delay_by_user(request):
         'delay_reason_reported_by__username'
     ).annotate(
         count=Count('id'),
-        exceeded_9h_count=Count('id', filter=Q(exceeded_9_hours=True))
+        exceeded_2h_count=Count('id', filter=Q(exceeded_9_hours=True))
     ).order_by('-count')
     
     data = []
