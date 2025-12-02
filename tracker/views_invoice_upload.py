@@ -807,7 +807,7 @@ def api_create_invoice_from_upload(request):
                     inv.generate_invoice_number()
 
             # Save invoice (function-level retry will handle database locks)
-            inv.save()
+            _save_with_retry(inv)
 
             # Save uploaded document if provided (optional in two-step flow)
             try:
