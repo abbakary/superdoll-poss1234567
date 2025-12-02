@@ -11,6 +11,7 @@ from . import views_invoice
 from . import views_invoice_upload
 from . import views_vehicle_tracking
 from . import views_labour_codes
+from . import views_delay_analytics
 
 app_name = "tracker"
 
