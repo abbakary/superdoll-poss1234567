@@ -225,7 +225,8 @@ function downloadSampleCSV() {
         '11013,TYRE SERVICE CONTRACTS,tyre service\n' +
         '21096,GREASE SERVICE 4X4,labour\n' +
         '22202,SHOCK ABSORBERS SERVICE FOR TRUCK,labour\n' +
-        '33002,INTEGRATED SERVICE,labour';
+        '33002,INTEGRATED SERVICE,labour\n' +
+        '99001,MISCELLANEOUS ITEM,unspecified';
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -281,7 +282,8 @@ function downloadSampleExcel() {
             ['22004', 'BRAKE PAD FITMENT PER AXLE FOR TRUCK', 'labour'],
             ['21096', 'GREASE SERVICE 4X4', 'labour'],
             ['22202', 'SHOCK ABSORBERS SERVICE FOR TRUCK', 'labour'],
-            ['33002', 'INTEGRATED SERVICE', 'labour']
+            ['33002', 'INTEGRATED SERVICE', 'labour'],
+            ['99001', 'MISCELLANEOUS ITEM', 'unspecified']
         ];
 
         let csv = data.map(row => row.map(cell => {
