@@ -496,7 +496,7 @@ def api_create_invoice_from_upload(request):
                                 updated = True
 
                             if updated:
-                                customer_obj.save()
+                                _save_with_retry(customer_obj)
 
                             logger.info(f"Found existing customer by phone for invoice upload: {customer_obj.id} - {customer_name}")
                         else:
