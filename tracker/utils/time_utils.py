@@ -13,7 +13,7 @@ OVERDUE_THRESHOLD_HOURS = 2
 
 def is_order_overdue(started_at: datetime, now: datetime = None) -> bool:
     """
-    Check if an order has exceeded the 9-hour calendar threshold.
+    Check if an order has exceeded the 2-hour calendar threshold.
     Simple calculation: just check elapsed calendar hours, no working hour complexity.
 
     Args:
@@ -21,7 +21,7 @@ def is_order_overdue(started_at: datetime, now: datetime = None) -> bool:
         now: Current datetime (defaults to timezone.now())
 
     Returns:
-        True if order has been active for 9+ calendar hours, False otherwise
+        True if order has been active for 2+ calendar hours, False otherwise
     """
     if not started_at:
         return False
