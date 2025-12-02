@@ -185,7 +185,7 @@ def api_delay_analytics_summary(request):
             'total_delayed_orders': total_delayed,
             'total_all_orders': total_all,
             'delay_percentage': round(delay_percentage, 2),
-            'exceeded_9_hours': exceeded_9_hours_count,
+            'exceeded_2_hours': exceeded_2_hours_count,
             'average_hours': round(avg_hours, 1),
         },
         'top_reasons': top_reasons
