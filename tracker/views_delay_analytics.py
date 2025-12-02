@@ -429,14 +429,24 @@ def api_delay_impact_analysis(request):
     ).filter(delay_count__gte=2).count()
     
     # Get most problematic reasons by impact
-    reason_impact = orders_qs.values(
+    reason_impact_raw = orders_qs.values(
         'delay_reason__reason_text',
-        'delay_reason__category__get_category_display'
+        'delay_reason__category__category'
     ).annotate(
         count=Count('id'),
         affected_customers=Count('customer', distinct=True)
     ).order_by('-count')[:5]
-    
+
+    reason_impact = []
+    for item in reason_impact_raw:
+        reason_impact.append({
+            'delay_reason__reason_text': item['delay_reason__reason_text'],
+            'delay_reason__category__category': item['delay_reason__category__category'],
+            'delay_reason__category__get_category_display': _get_category_display(item['delay_reason__category__category']),
+            'count': item['count'],
+            'affected_customers': item['affected_customers'],
+        })
+
     return JsonResponse({
         'success': True,
         'impact': {
@@ -445,7 +455,7 @@ def api_delay_impact_analysis(request):
             'customers_with_repeat_delays': customers_with_delays,
             'total_unique_customers_affected': orders_qs.values('customer').distinct().count(),
         },
-        'reason_impact': list(reason_impact)
+        'reason_impact': reason_impact
     })
 
 
