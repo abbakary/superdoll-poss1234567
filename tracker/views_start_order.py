@@ -29,7 +29,7 @@ def api_start_order(request):
     Start order endpoint enhanced:
     Accepts:
       - plate_number (required)
-      - order_type (service|sales|inquiry)
+      - order_type (service|sales|inquiry|labour|unspecified|mixed)
       - use_existing_customer (optional boolean)
       - existing_customer_id (optional int)
       - service_selection (optional list of service names)
@@ -55,8 +55,10 @@ def api_start_order(request):
         if not plate_number and not (use_existing and existing_customer_id):
             return JsonResponse({'success': False, 'error': 'Vehicle plate number is required'}, status=400)
 
-        if order_type not in ['service', 'sales', 'inquiry']:
-            return JsonResponse({'success': False, 'error': 'Invalid order type'}, status=400)
+        # Accept all valid order types from Order.TYPE_CHOICES plus 'mixed' for multi-category orders
+        valid_order_types = ['service', 'sales', 'inquiry', 'labour', 'unspecified', 'mixed']
+        if order_type not in valid_order_types:
+            return JsonResponse({'success': False, 'error': f'Invalid order type. Must be one of: {", ".join(valid_order_types)}'}, status=400)
 
         user_branch = get_user_branch(request.user)
         from .services import CustomerService, VehicleService
