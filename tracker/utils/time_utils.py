@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 
 
-# Simple overdue threshold: 9 calendar hours
-OVERDUE_THRESHOLD_HOURS = 9
+# Simple overdue threshold: 2 calendar hours
+OVERDUE_THRESHOLD_HOURS = 2
 
 
 def is_order_overdue(started_at: datetime, now: datetime = None) -> bool:
