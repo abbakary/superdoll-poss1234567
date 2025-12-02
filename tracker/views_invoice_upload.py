@@ -1089,6 +1089,23 @@ def api_create_invoice_from_upload(request):
             except Exception as e:
                 logger.warning(f"Failed to update order from invoice: {e}")
 
+            # Create OrderInvoiceLink to link invoice to order for display on order detail page
+            # This ensures additional invoices are shown in the "Additional Invoices" section
+            if order and inv:
+                try:
+                    from .models import OrderInvoiceLink
+                    link, created = OrderInvoiceLink.objects.get_or_create(
+                        order=order,
+                        invoice=inv,
+                        defaults={'is_primary': False}
+                    )
+                    if created:
+                        logger.info(f"Created OrderInvoiceLink for invoice {inv.id} to order {order.id}")
+                    else:
+                        logger.info(f"OrderInvoiceLink already exists for invoice {inv.id} and order {order.id}")
+                except Exception as e:
+                    logger.warning(f"Failed to create OrderInvoiceLink for invoice {inv.id}: {e}")
+
             # Handle additional order types/components
             try:
                 additional_order_types_json = request.POST.get('additional_order_types', '[]')
