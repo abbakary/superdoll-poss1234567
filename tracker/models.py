@@ -189,7 +189,7 @@ class LabourCode(models.Model):
 
 
 class Order(models.Model):
-    TYPE_CHOICES = [("service", "Service"), ("sales", "Sales"), ("inquiry", "Inquiries"), ("labour", "Labour")]
+    TYPE_CHOICES = [("service", "Service"), ("sales", "Sales"), ("inquiry", "Inquiries"), ("labour", "Labour"), ("unspecified", "Unspecified")]
     STATUS_CHOICES = [
         ("created", "Started"),
         ("in_progress", "In Progress"),
