@@ -387,6 +387,10 @@
                   <span class="badge rounded-pill order-type-badge order-type-inquiry">
                     <i class="fa fa-question-circle me-1"></i>Inquiry
                   </span>
+                {% elif o.type == 'unspecified' %}
+                  <span class="badge rounded-pill order-type-badge order-type-unspecified">
+                    <i class="fa fa-circle-question me-1"></i>Unspecified
+                  </span>
                 {% else %}
                   <span class="badge bg-secondary rounded-pill">{{ o.type }}</span>
                 {% endif %}
