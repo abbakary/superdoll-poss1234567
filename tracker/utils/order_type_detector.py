@@ -108,17 +108,18 @@ def determine_order_type_from_codes(item_codes: List[str]) -> Tuple[str, List[st
 def _normalize_category_to_order_type(category: str) -> str:
     """
     Normalize a labour code category to a valid order type.
-    
+
     Examples:
     - 'labour' -> 'labour'
     - 'tyre service' -> 'service'
     - 'tyre service / makill' -> 'service'
+    - None/empty -> 'unspecified'
     """
     if not category:
-        return 'sales'
-    
+        return 'unspecified'
+
     category_lower = category.lower().strip()
-    
+
     # Direct mapping
     if category_lower == 'labour':
         return 'labour'
