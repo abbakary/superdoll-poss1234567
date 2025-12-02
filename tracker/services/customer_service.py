@@ -573,7 +573,7 @@ class OrderService:
 
         Args:
             customer: The customer for this order
-            order_type: 'service', 'sales', or 'inquiry'
+            order_type: 'service', 'sales', 'inquiry', 'labour', 'unspecified', or 'mixed'
             branch: User's branch
             vehicle: Associated vehicle (optional)
             description: Order description
@@ -587,8 +587,10 @@ class OrderService:
         if not customer:
             raise ValueError("Customer is required")
 
-        if order_type not in ['service', 'sales', 'inquiry']:
-            raise ValueError(f"Invalid order type: {order_type}")
+        # Accept all valid order types from Order.TYPE_CHOICES
+        valid_order_types = ['service', 'sales', 'inquiry', 'labour', 'unspecified', 'mixed']
+        if order_type not in valid_order_types:
+            raise ValueError(f"Invalid order type: {order_type}. Must be one of: {', '.join(valid_order_types)}")
 
         try:
             with transaction.atomic():
