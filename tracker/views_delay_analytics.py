@@ -44,7 +44,7 @@ def delay_analytics_dashboard(request):
     # Get user/team filter
     selected_user = request.GET.get('user', '')
     
-    # Get order type filter
+    # Get order type filter (service, sales, inquiry, labour, unspecified, mixed)
     selected_order_type = request.GET.get('order_type', '')
     
     # Base queryset
