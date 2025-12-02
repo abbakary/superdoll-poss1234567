@@ -363,12 +363,14 @@ def api_create_invoice_from_upload(request):
             break
 
     try:
-        with transaction.atomic():
-            # Priority 1: Use pre-selected customer (from started order detail page)
-            # This prevents creating duplicate customers when uploading invoice for known customer
-            customer_id = request.POST.get('pre_selected_customer_id') or request.POST.get('customer_id')
-            customer_obj = None
-            created = False
+        # NOTE: Removed @transaction.atomic() wrapper to prevent transaction corruption on database locks
+        # The @retry_on_db_lock decorator handles retries, and individual operations use _save_with_retry()
+
+        # Priority 1: Use pre-selected customer (from started order detail page)
+        # This prevents creating duplicate customers when uploading invoice for known customer
+        customer_id = request.POST.get('pre_selected_customer_id') or request.POST.get('customer_id')
+        customer_obj = None
+        created = False
 
             customer_name = request.POST.get('customer_name', '').strip()
             customer_phone = request.POST.get('customer_phone', '').strip()
