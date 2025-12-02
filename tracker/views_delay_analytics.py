@@ -144,7 +144,7 @@ def api_delay_analytics_summary(request):
     total_all = total_all_orders.count()
     delay_percentage = (total_delayed / total_all * 100) if total_all > 0 else 0
     
-    # Orders with exceeded 2 hours threshold
+    # Orders with exceeded 2-hour threshold
     exceeded_2_hours_count = orders_qs.filter(exceeded_9_hours=True).count()
     
     # Average time from start to completion for delayed orders
@@ -262,7 +262,7 @@ def api_delay_trends(request):
         date=TruncDate('delay_reason_reported_at')
     ).values('date').annotate(
         count=Count('id'),
-        exceeded_9h=Count('id', filter=Q(exceeded_9_hours=True))
+        exceeded_2h=Count('id', filter=Q(exceeded_9_hours=True))
     ).order_by('date')
     
     # Also get total orders per day for context
@@ -496,7 +496,7 @@ def api_delay_recommendations(request):
                 'impact': 'high'
             })
     
-    # Analysis 2: Orders exceeding 2 hours threshold
+    # Analysis 2: Orders exceeding 2-hour threshold
     exceeded_count = orders_qs.filter(exceeded_9_hours=True).count()
     if exceeded_count > 0 and orders_qs.count() > 0:
         pct = (exceeded_count / orders_qs.count()) * 100
@@ -505,7 +505,7 @@ def api_delay_recommendations(request):
             'priority': priority,
             'category': 'Urgent',
             'title': f"{pct:.1f}% of Delays Exceed 2 Hours",
-            'description': f"{exceeded_count} orders exceeded 2 hours. Implement preventive measures to reduce critical delays.",
+            'description': f"{exceeded_count} orders exceeded the 2-hour threshold. Implement preventive measures to reduce critical delays.",
             'impact': 'critical'
         })
     

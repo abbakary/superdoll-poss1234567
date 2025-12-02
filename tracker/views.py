@@ -3551,7 +3551,7 @@ def complete_order(request: HttpRequest, pk: int):
             o.overrun_reason = delay_reason_text
             o.overrun_reported_at = timezone.now()
             o.overrun_reported_by = request.user
-            # Mark as exceeded_9_hours if delay reason provided and order exceeded 2 hour threshold
+            # Mark as exceeded_9_hours if delay reason provided and order exceeded 2-hour threshold
             if exceeds_9_hours:
                 o.exceeded_9_hours = True
             o.save(update_fields=['overrun_reason', 'overrun_reported_at', 'overrun_reported_by', 'exceeded_9_hours'])
