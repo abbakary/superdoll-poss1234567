@@ -164,5 +164,7 @@ def _format_type_name(order_type: str) -> str:
         return 'Sales'
     elif order_type == 'inquiry':
         return 'Inquiry'
+    elif order_type == 'unspecified':
+        return 'Unspecified'
     else:
         return order_type.title()
