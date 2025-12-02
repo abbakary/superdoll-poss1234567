@@ -481,18 +481,18 @@ def api_delay_recommendations(request):
     
     # Analysis 1: Most common category
     category_counts = orders_qs.values(
-        'delay_reason__category__category',
-        'delay_reason__category__get_category_display'
+        'delay_reason__category__category'
     ).annotate(count=Count('id')).order_by('-count')
-    
+
     if category_counts.exists():
         top_cat = category_counts[0]
         if top_cat['count'] > orders_qs.count() * 0.3:
+            category_display = _get_category_display(top_cat['delay_reason__category__category'])
             recommendations.append({
                 'priority': 'high',
                 'category': 'Process Improvement',
-                'title': f"Address {top_cat['delay_reason__category__get_category_display']} Issues",
-                'description': f"{top_cat['delay_reason__category__get_category_display']} accounts for {round(top_cat['count'] / orders_qs.count() * 100, 1)}% of delays. Consider process improvements or resource allocation.",
+                'title': f"Address {category_display} Issues",
+                'description': f"{category_display} accounts for {round(top_cat['count'] / orders_qs.count() * 100, 1)}% of delays. Consider process improvements or resource allocation.",
                 'impact': 'high'
             })
     
