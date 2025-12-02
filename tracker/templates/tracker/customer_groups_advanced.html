@@ -230,7 +230,10 @@ class CustomerGroupsManager {
       'all': 'All Order Types',
       'service': 'Service Orders Only',
       'sales': 'Sales Orders Only',
-      'inquiry': 'Inquiry Orders Only'
+      'inquiry': 'Inquiry Orders Only',
+      'labour': 'Labour Orders Only',
+      'unspecified': 'Unspecified Orders Only',
+      'mixed': 'Mixed Category Orders Only'
     };
 
     let summary = `${periodLabels[this.currentPeriod]} - ${activityLabels[this.currentActivity]} - ${orderTypeLabels[this.currentOrderType]}`;
