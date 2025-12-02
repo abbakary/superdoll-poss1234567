@@ -460,7 +460,7 @@ def api_create_invoice_from_upload(request):
                         if tax_num and (not customer_obj.tax_number or customer_obj.tax_number != tax_num):
                             customer_obj.tax_number = tax_num; updated = True
                         if updated:
-                            customer_obj.save()
+                            _save_with_retry(customer_obj)
                         logger.info(f"Found existing customer by name for invoice upload: {customer_obj.id} - {customer_name}")
                     else:
                         # Phone is provided - check for existing customer with this phone first
