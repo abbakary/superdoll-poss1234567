@@ -1018,10 +1018,62 @@ td.text-end:last-child {
     vertical-align: middle !important;
 }
 
+/* Table header styling - ensure single line display */
+.table thead th {
+    white-space: nowrap;
+    padding: 0.75rem 0.5rem !important;
+    vertical-align: middle !important;
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
 /* Make sure the type column has enough space */
 .table th:nth-child(3),
 .table td:nth-child(3) {
     min-width: 120px;
+}
+
+/* Ensure Order # column is proper width */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+    min-width: 110px;
+}
+
+/* Ensure Customer column is proper width */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+    min-width: 150px;
+}
+
+/* Ensure Status column is proper width */
+.table th:nth-child(4),
+.table td:nth-child(4) {
+    min-width: 110px;
+}
+
+/* Ensure Salesperson column is proper width */
+.table th:nth-child(5),
+.table td:nth-child(5) {
+    min-width: 140px;
+}
+
+/* Ensure Created column is proper width */
+.table th:nth-child(6),
+.table td:nth-child(6) {
+    min-width: 120px;
+}
+
+/* Ensure Time column is proper width */
+.table th:nth-child(7),
+.table td:nth-child(7) {
+    min-width: 130px;
+}
+
+/* Ensure Actions column is proper width */
+.table th:nth-child(8),
+.table td:nth-child(8) {
+    min-width: 60px;
+    text-align: right;
 }
 
 /* Force visibility */
