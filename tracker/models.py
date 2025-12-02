@@ -167,7 +167,7 @@ class LabourCode(models.Model):
     """
     Mapping of item codes to order types/categories.
     Used to automatically determine order type when processing invoices.
-    Category values: 'labour' or 'service' (service includes tyre, wheel, and other service codes)
+    Category values: 'labour', 'service', 'tyre service', 'sales', or 'unspecified'.
     """
     code = models.CharField(max_length=32, unique=True, db_index=True)
     description = models.CharField(max_length=255)
