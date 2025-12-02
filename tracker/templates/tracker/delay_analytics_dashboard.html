@@ -1,0 +1,588 @@
+{% extends "tracker/base_formatted.html" %}
+{% load static %}
+
+{% block title %}Delay Reason Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-1">
+                        <i class="fa fa-chart-line me-2 text-primary"></i>
+                        Delay Reason Analytics
+                    </h1>
+                    <p class="text-muted mb-0">Advanced analysis and management of order delays</p>
+                </div>
+                <button class="btn btn-outline-primary" id="refreshBtn">
+                    <i class="fa fa-sync me-1"></i> Refresh Data
+                </button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="card shadow-sm mb-4 filter-card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Time Period</label>
+                            <select class="form-select" id="periodFilter" name="period">
+                                <option value="7days" {% if time_period == '7days' %}selected{% endif %}>Last 7 Days</option>
+                                <option value="30days" {% if time_period == '30days' %}selected{% endif %}>Last 30 Days</option>
+                                <option value="90days" {% if time_period == '90days' %}selected{% endif %}>Last 90 Days</option>
+                                <option value="6months" {% if time_period == '6months' %}selected{% endif %}>Last 6 Months</option>
+                                <option value="1year" {% if time_period == '1year' %}selected{% endif %}>Last Year</option>
+                                <option value="all" {% if time_period == 'all' %}selected{% endif %}>All Time</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Delay Category</label>
+                            <select class="form-select" id="categoryFilter" name="category">
+                                <option value="">All Categories</option>
+                                {% for cat_value, cat_name in categories %}
+                                    <option value="{{ cat_value }}" {% if selected_category == cat_value %}selected{% endif %}>{{ cat_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Order Type</label>
+                            <select class="form-select" id="orderTypeFilter" name="order_type">
+                                <option value="">All Types</option>
+                                {% for type_value, type_name in order_types %}
+                                    <option value="{{ type_value }}" {% if selected_order_type == type_value %}selected{% endif %}>{{ type_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Team Member</label>
+                            <select class="form-select" id="userFilter" name="user">
+                                <option value="">All Members</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name|default:user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-primary" id="applyFiltersBtn">
+                                <i class="fa fa-filter me-1"></i> Apply Filters
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="resetFiltersBtn">
+                                <i class="fa fa-undo me-1"></i> Reset Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row mb-4" id="kpiSection">
+        <div class="col-md-3">
+            <div class="card shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Total Delayed Orders</p>
+                            <h3 class="mb-0" id="totalDelayedOrders">{{ total_delayed_orders }}</h3>
+                        </div>
+                        <div class="stat-icon bg-danger-light">
+                            <i class="fa fa-exclamation-circle text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Delay Rate</p>
+                            <h3 class="mb-0" id="delayRate">{{ delay_rate }}%</h3>
+                        </div>
+                        <div class="stat-icon bg-warning-light">
+                            <i class="fa fa-percentage text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Exceeded 9 Hours</p>
+                            <h3 class="mb-0" id="exceeded9Hours">-</h3>
+                        </div>
+                        <div class="stat-icon bg-info-light">
+                            <i class="fa fa-clock text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">Avg Duration (hrs)</p>
+                            <h3 class="mb-0" id="avgDuration">-</h3>
+                        </div>
+                        <div class="stat-icon bg-success-light">
+                            <i class="fa fa-hourglass-half text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <!-- Delay Trends Chart -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-chart-line me-2"></i> Delay Trends Over Time
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="delayTrendsChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delay by Category Chart -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-pie-chart me-2"></i> Delays by Category
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="delayByCategoryChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Delays by Order Type -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-barcode me-2"></i> Delays by Order Type
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="delayByTypeChart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Delay Reasons -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-list me-2"></i> Top 10 Delay Reasons
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="topReasonsContainer" style="max-height: 400px; overflow-y: auto;">
+                        <p class="text-muted">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Team Member Performance -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-users me-2"></i> Delay Distribution by Team Member
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="delayByUserChart" style="height: 350px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Impact Analysis -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-bolt me-2"></i> Impact Analysis
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="impactMetrics">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Total Delayed Hours</p>
+                                <h3 id="totalDelayedHours">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Revenue Impact</p>
+                                <h3 id="revenueImpact">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Affected Customers</p>
+                                <h3 id="affectedCustomers">-</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <p class="text-muted small">Repeat Delays</p>
+                                <h3 id="repeatDelays">-</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations Section -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fa fa-lightbulb me-2"></i> Recommendations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="recommendationsContainer">
+                        <p class="text-muted">Loading recommendations...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-card {
+        border-left: 4px solid #007bff;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .bg-danger-light {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .bg-warning-light {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+
+    .bg-info-light {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+
+    .bg-success-light {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .filter-card {
+        background-color: #f8f9fa;
+    }
+
+    .recommendation-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #007bff;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .recommendation-item.high {
+        border-left-color: #dc3545;
+    }
+
+    .recommendation-item.medium {
+        border-left-color: #ffc107;
+    }
+
+    .recommendation-item.low {
+        border-left-color: #17a2b8;
+    }
+
+    .recommendation-priority {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .recommendation-priority.high {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .recommendation-priority.medium {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .recommendation-priority.low {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .reason-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .reason-item:last-child {
+        border-bottom: none;
+    }
+
+    .reason-badge {
+        background-color: #007bff;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .reason-percentage {
+        color: #6c757d;
+        font-size: 0.9rem;
+        min-width: 50px;
+        text-align: right;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@latest"></script>
+<script>
+    function getFilters() {
+        return {
+            period: document.getElementById('periodFilter').value,
+            category: document.getElementById('categoryFilter').value,
+            user: document.getElementById('userFilter').value,
+            order_type: document.getElementById('orderTypeFilter').value,
+        };
+    }
+
+    async function updateAnalytics() {
+        const filters = getFilters();
+        const params = new URLSearchParams(filters);
+
+        try {
+            const summaryResp = await fetch("{% url 'tracker:api_delay_analytics_summary' %}" + "?" + params);
+            const summary = await summaryResp.json();
+
+            if (summary.success) {
+                document.getElementById('totalDelayedOrders').textContent = summary.summary.total_delayed_orders;
+                document.getElementById('delayRate').textContent = summary.summary.delay_percentage + '%';
+                document.getElementById('exceeded9Hours').textContent = summary.summary.exceeded_9_hours;
+                document.getElementById('avgDuration').textContent = summary.summary.average_hours;
+                updateTopReasons(summary.top_reasons);
+            }
+
+            const trendsResp = await fetch("{% url 'tracker:api_delay_trends' %}" + "?" + params);
+            const trends = await trendsResp.json();
+            if (trends.success) {
+                updateDelayTrendsChart(trends.data);
+            }
+
+            const categoryResp = await fetch("{% url 'tracker:api_delay_reasons_breakdown' %}" + "?" + params);
+            const category = await categoryResp.json();
+            if (category.success) {
+                updateCategoryChart(category.data);
+            }
+
+            const typeResp = await fetch("{% url 'tracker:api_delay_by_order_type' %}" + "?" + params);
+            const typeData = await typeResp.json();
+            if (typeData.success) {
+                updateTypeChart(typeData.data);
+            }
+
+            const userResp = await fetch("{% url 'tracker:api_delay_by_user' %}" + "?" + params);
+            const userData = await userResp.json();
+            if (userData.success) {
+                updateUserChart(userData.data);
+            }
+
+            const impactResp = await fetch("{% url 'tracker:api_delay_impact_analysis' %}" + "?" + params);
+            const impact = await impactResp.json();
+            if (impact.success) {
+                updateImpactMetrics(impact.impact);
+            }
+
+            const recResp = await fetch("{% url 'tracker:api_delay_recommendations' %}" + "?" + params);
+            const recommendations = await recResp.json();
+            if (recommendations.success) {
+                updateRecommendations(recommendations.recommendations);
+            }
+        } catch (error) {
+            console.error('Error loading analytics:', error);
+        }
+    }
+
+    function updateDelayTrendsChart(data) {
+        const dates = data.map(d => d.date);
+        const delayedCounts = data.map(d => d.delayed_count);
+        const delayRates = data.map(d => d.delay_rate);
+
+        const options = {
+            chart: { type: 'area', height: 300 },
+            series: [
+                { name: 'Delayed Orders', data: delayedCounts },
+                { name: 'Delay Rate %', data: delayRates }
+            ],
+            xaxis: { categories: dates },
+            yaxis: [
+                { title: { text: 'Count' } },
+                { opposite: true, title: { text: 'Rate %' } }
+            ],
+            tooltip: { shared: true }
+        };
+
+        const chart = new ApexCharts(document.getElementById('delayTrendsChart'), options);
+        chart.render();
+    }
+
+    function updateCategoryChart(data) {
+        const labels = data.map(d => d.category_name);
+        const values = data.map(d => d.count);
+
+        const options = {
+            chart: { type: 'donut', height: 300 },
+            labels: labels,
+            series: values,
+            plotOptions: { pie: { donut: { size: '65%' } } },
+            tooltip: { y: { formatter: function(val) { return val + ' orders'; } } }
+        };
+
+        const chart = new ApexCharts(document.getElementById('delayByCategoryChart'), options);
+        chart.render();
+    }
+
+    function updateTypeChart(data) {
+        const labels = data.map(d => d.type_name);
+        const values = data.map(d => d.count);
+
+        const options = {
+            chart: { type: 'bar', height: 300 },
+            series: [{ name: 'Orders', data: values }],
+            xaxis: { categories: labels },
+            colors: ['#007bff']
+        };
+
+        const chart = new ApexCharts(document.getElementById('delayByTypeChart'), options);
+        chart.render();
+    }
+
+    function updateUserChart(data) {
+        const labels = data.map(d => d.user_name);
+        const values = data.map(d => d.delay_count);
+
+        const options = {
+            chart: { type: 'bar', height: 350 },
+            series: [{ name: 'Delay Count', data: values }],
+            xaxis: { categories: labels },
+            plotOptions: { bar: { horizontal: true } }
+        };
+
+        const chart = new ApexCharts(document.getElementById('delayByUserChart'), options);
+        chart.render();
+    }
+
+    function updateTopReasons(reasons) {
+        const html = reasons.map(r => `
+            <div class="reason-item">
+                <div>
+                    <strong>${r['delay_reason__reason_text']}</strong><br/>
+                    <small class="text-muted">${r['delay_reason__category__get_category_display']}</small>
+                </div>
+                <div class="text-end">
+                    <div class="reason-badge">${r.count}</div>
+                    <div class="reason-percentage">${r.percentage}%</div>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('topReasonsContainer').innerHTML = html || '<p class="text-muted">No data available</p>';
+    }
+
+    function updateImpactMetrics(impact) {
+        document.getElementById('totalDelayedHours').textContent = impact.total_delayed_hours.toFixed(1) + ' hrs';
+        document.getElementById('revenueImpact').textContent = '₤' + (parseFloat(impact.estimated_revenue_impact) || 0).toLocaleString();
+        document.getElementById('affectedCustomers').textContent = impact.total_unique_customers_affected;
+        document.getElementById('repeatDelays').textContent = impact.customers_with_repeat_delays;
+    }
+
+    function updateRecommendations(recommendations) {
+        const html = recommendations.map(r => `
+            <div class="recommendation-item ${r.priority}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="recommendation-priority ${r.priority}">${r.priority.toUpperCase()}</span>
+                        <h6 class="d-inline-block">${r.title}</h6>
+                        <p class="mb-0 text-muted small mt-1">${r.description}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('recommendationsContainer').innerHTML = html || '<p class="text-muted">No recommendations available</p>';
+    }
+
+    document.getElementById('applyFiltersBtn').addEventListener('click', updateAnalytics);
+    document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+        document.getElementById('periodFilter').value = '30days';
+        document.getElementById('categoryFilter').value = '';
+        document.getElementById('userFilter').value = '';
+        document.getElementById('orderTypeFilter').value = '';
+        updateAnalytics();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', updateAnalytics);
+
+    document.addEventListener('DOMContentLoaded', updateAnalytics);
+</script>
+{% endblock %}

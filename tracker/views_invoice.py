@@ -567,9 +567,9 @@ def api_upload_extract_invoice(request):
                 code = it.get('code')
 
                 # Determine order_type from code
-                order_type = 'unknown'
+                order_type = 'unspecified'
                 if code and code in code_order_types:
-                    order_type = code_order_types[code].get('order_type', 'unknown')
+                    order_type = code_order_types[code].get('order_type', 'unspecified')
 
                 to_create.append(InvoiceLineItem(
                     invoice=inv,
@@ -706,12 +706,12 @@ def invoice_detail(request, pk):
                         from tracker.views_invoice_upload import _get_item_code_categories
                         code_categories = _get_item_code_categories([line_item.code])
                         if line_item.code in code_categories:
-                            line_item.order_type = code_categories[line_item.code].get('order_type', 'unknown')
+                            line_item.order_type = code_categories[line_item.code].get('order_type', 'unspecified')
                     except Exception as e:
                         logger.warning(f"Failed to determine order_type for code {line_item.code}: {e}")
-                        line_item.order_type = 'unknown'
+                        line_item.order_type = 'unspecified'
                 else:
-                    line_item.order_type = 'unknown'
+                    line_item.order_type = 'unspecified'
 
                 line_item.save()
                 invoice.calculate_totals().save()

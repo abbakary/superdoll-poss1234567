@@ -11,6 +11,7 @@ from . import views_invoice
 from . import views_invoice_upload
 from . import views_vehicle_tracking
 from . import views_labour_codes
+from . import views_delay_analytics
 
 app_name = "tracker"
 
@@ -191,4 +192,14 @@ urlpatterns = [
     path("invoices/order/<int:order_id>/", views_invoice.invoice_list, name="invoice_list_for_order"),
     path("api/invoices/recent/", views_invoice.api_recent_invoices, name="api_invoices_recent"),
     path("api/invoices/inventory/", views_invoice.api_inventory_for_invoice, name="api_invoices_inventory"),
+
+    # Delay Reason Analytics
+    path("analytics/delays/", views_delay_analytics.delay_analytics_dashboard, name="delay_analytics_dashboard"),
+    path("api/analytics/delays/summary/", views_delay_analytics.api_delay_analytics_summary, name="api_delay_analytics_summary"),
+    path("api/analytics/delays/breakdown/", views_delay_analytics.api_delay_reasons_breakdown, name="api_delay_reasons_breakdown"),
+    path("api/analytics/delays/trends/", views_delay_analytics.api_delay_trends, name="api_delay_trends"),
+    path("api/analytics/delays/by-type/", views_delay_analytics.api_delay_by_order_type, name="api_delay_by_order_type"),
+    path("api/analytics/delays/by-user/", views_delay_analytics.api_delay_by_user, name="api_delay_by_user"),
+    path("api/analytics/delays/impact/", views_delay_analytics.api_delay_impact_analysis, name="api_delay_impact_analysis"),
+    path("api/analytics/delays/recommendations/", views_delay_analytics.api_delay_recommendations, name="api_delay_recommendations"),
 ]

@@ -878,13 +878,13 @@ def api_create_invoice_from_upload(request):
                             line_total = qty * unit_price
 
                         # Get order type for this item from code mapping
-                        item_order_type = 'unknown'
+                        item_order_type = 'unspecified'
                         if code and code in code_order_types:
-                            item_order_type = code_order_types[code].get('order_type', 'unknown')
+                            item_order_type = code_order_types[code].get('order_type', 'unspecified')
                         elif code:
-                            item_order_type = 'unknown'
+                            item_order_type = 'unspecified'
                         else:
-                            item_order_type = 'unknown'
+                            item_order_type = 'unspecified'
 
                         key = (
                             (code or ''),

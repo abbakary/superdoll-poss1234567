@@ -1630,7 +1630,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'service': 'rgba(255, 171, 92, 0.7)',
             'labour': 'rgba(147, 112, 219, 0.7)',
             'inquiry': 'rgba(102, 126, 234, 0.7)',
-            'unknown': 'rgba(200, 200, 200, 0.7)'
+            'unspecified': 'rgba(200, 200, 200, 0.7)'
         };
 
         const borderColors = {
@@ -1638,15 +1638,15 @@ document.addEventListener('DOMContentLoaded', function() {
             'service': 'rgba(255, 171, 92, 1)',
             'labour': 'rgba(147, 112, 219, 1)',
             'inquiry': 'rgba(102, 126, 234, 1)',
-            'unknown': 'rgba(200, 200, 200, 1)'
+            'unspecified': 'rgba(200, 200, 200, 1)'
         };
 
         // Create datasets for each category
         const chartDatasets = data.spending_by_type.map((item, index) => ({
             label: categories[index],
             data: [amounts[index]],
-            backgroundColor: categoryColors[item.type.toLowerCase()] || categoryColors['unknown'],
-            borderColor: borderColors[item.type.toLowerCase()] || borderColors['unknown'],
+            backgroundColor: categoryColors[item.type.toLowerCase()] || categoryColors['unspecified'],
+            borderColor: borderColors[item.type.toLowerCase()] || borderColors['unspecified'],
             borderWidth: 2,
             borderRadius: 6,
             barPercentage: 0.6,
